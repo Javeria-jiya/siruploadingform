@@ -2,6 +2,10 @@
 $pageTitle = "process.php";
 include './db.php';
 include 'header.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require 'vendor/autoload.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   // Collect form data
   $name     = ($_POST['fullname']);
@@ -46,13 +50,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 VALUES ('$name', '$email', '$gender', '$position', '$newFileName', '$newProfilePicName')";
 
     if ($conn->query($sql)) {
-?>
-      <div class="alert alert-success">
-        <h6>Thank you, <strong><?= $name; ?></strong>. Your application has been submitted.</h6>
-      </div>
-      <a href="index.php" class="btn btn-primary">Back to Form</a>
-      <a href="view.php" class="btn btn-success">View Applications</a>
-<?php
+      $mail = new PHPMailer(true);
+      try{
+        $mail->IsSMTP();
+        $mail->Host = "smtp.gmail.com";
+        $mail->SMTPAuth = true;
+        $mail->Username = 'memoonaisrar48@gmail.com';
+        $mail->Password = 'tuqn aeoz eayc aqlv';
+        $mail->SMTPSecure = "tls";
+        $mail->Port = 587;
+        $mail->setFrom('memoona@gmail.com', '');
+        $mail->addAddress($email , $name);
+        $mail->isHTML(true);
+        $mail->Subject = 'Application Status';
+        $mail->Body = 'Dear ' . $name . ',<br><br>
+        Thank you for applying for the position of ' . $position . '. Your application has been received and is currently being reviewed.<br><br>
+        Best regards,<br>
+        Memoona';
+        $mail->send();
+        echo "Email sent successfully";
+      }catch(Exception $e){
+        echo "<div>Email not sent</div>";
+   
+
+      }
+      echo '   <a href="index.php" class="btn btn-primary">Back to Form</a>';
+      echo '   <a href="view.php" class="btn btn-primary">View Applications</a>';
     }
   }
 }
